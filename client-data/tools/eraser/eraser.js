@@ -78,6 +78,7 @@
 	Tools.add({ //The new tool
 		"name": "Eraser",
 		"icon": "❌",
+		"iconHTML": "<i style='color: #e75480;margin-top:7px' class='fas fa-skull-crossbones'></i>",
 		"shortcut": "e",
 		"listeners": {
 			"press": startErasing,
