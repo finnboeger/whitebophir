@@ -28,7 +28,12 @@
 
 	//Indicates the id of the line the user is currently drawing or an empty string while the user is not drawing
 	var curLineId = "",
-		lastTime = performance.now(); //The time at which the last point was drawn
+		lastTime = performance.now(), //The time at which the last point was drawn
+		penIcons = ["tools/pencil/icon.svg", "tools/pencil/whiteout_tape.svg"],
+		toolName = ["Pencil", "Whiteout Pen"],
+		end = false;
+
+	var curPen = "pencil";
 
 	//The data of the message that will be sent for every new point
 	function PointMessage(x, y) {
@@ -48,9 +53,9 @@
 		Tools.drawAndSend({
 			'type': 'line',
 			'id': curLineId,
-			'color': Tools.getColor(),
+			'color': (curPen === "pencil" ? Tools.getColor() : "#ffffff"),
 			'size': Tools.getSize(),
-			'opacity': Tools.getOpacity()
+			'opacity': (curPen === "pencil" ? Tools.getOpacity() : 1),
 		});
 
 		//Immediatly add a point to the line
@@ -58,9 +63,9 @@
 	}
 
 	function continueLine(x, y, evt) {
-		/*Wait 70ms before adding any point to the currently drawing line.
+		/*Wait 20ms before adding any point to the currently drawing line.
 		This allows the animation to be smother*/
-		if (curLineId !== "" && performance.now() - lastTime > 70) {
+		if (curLineId !== "" && (performance.now() - lastTime > 20 || end)) {
 			Tools.drawAndSend(new PointMessage(x, y));
 			lastTime = performance.now();
 		}
@@ -69,12 +74,15 @@
 
 	function stopLine(x, y) {
 		//Add a last point to the line
+		end = true;
 		continueLine(x, y);
+		end = false;
 		curLineId = "";
 	}
 
 	var renderingLine = {};
 	function draw(data) {
+		Tools.drawingEvent = true;
 		switch (data.type) {
 			case "line":
 				renderingLine = createLine(data);
@@ -184,6 +192,20 @@
 		return line;
 	}
 
+
+	function toggle(elem){
+		var index = 0;
+		if (curPen === "pencil") {
+			curPen = "whiteout";
+			index = 1;
+		} else {
+			curPen = "pencil";
+		}
+		elem.getElementsByClassName("tool-icon")[0].src = penIcons[index];
+		elem.getElementsByClassName("tool-name")[0].textContent = toolName[index];
+	}
+
+
 	Tools.add({
 		"name": "Pencil",
 		"shortcut": "p",
@@ -193,8 +215,9 @@
 			"release": stopLine,
 		},
 		"draw": draw,
+		"toggle":toggle,
 		"mouseCursor": "url('tools/pencil/cursor.svg'), crosshair",
-		"icon": "tools/pencil/icon.svg",
+		"icon": penIcons[0],
 		"stylesheet": "tools/pencil/pencil.css"
 	});
 
