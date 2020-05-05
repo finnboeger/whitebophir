@@ -108,6 +108,7 @@ function handleRequest(request, response) {
 			});
 			break;
 
+		case "export":
 		case "preview":
 			var boardName = encodeURIComponent(parts[1]),
 				history_file = path.join(config.HISTORY_DIR, "board-" + boardName + ".json");
